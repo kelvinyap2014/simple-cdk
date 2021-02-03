@@ -8,16 +8,19 @@ export class SimpleCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // Create a S3 Bucket
     new s3.Bucket(this, 'SimpleBucket', {
       versioned: true,
       publicReadAccess: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    // Create a VPC
     const vpc = new ec2.Vpc(this, "SimpleVpc", {
       maxAzs: 3 // Default is all AZs in region
     });
 
+    // Create a ECS Cluster
     const cluster = new ecs.Cluster(this, "SimpleCluster", {
       vpc: vpc
     });
@@ -32,7 +35,8 @@ export class SimpleCdkStack extends cdk.Stack {
       publicLoadBalancer: false // Default is false
     });
 
-    // Create a load-balanced Node Fargate service and make it private
+    // Create a load-balanced Node Fargate service and make it public
+    // React app with talk to Node Service over public Internet
     new ecs_patterns.ApplicationLoadBalancedFargateService(this, "SimpleNodeFargateService", {
       cluster: cluster, // Required
       cpu: 256, // Default is 256
