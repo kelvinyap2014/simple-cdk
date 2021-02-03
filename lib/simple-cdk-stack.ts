@@ -49,7 +49,7 @@ export class SimpleCdkStack extends cdk.Stack {
     });
 
     // Create a DynamoDB table
-    const table = new dynamodb.Table(this, 'SimpleTable', {
+    new dynamodb.Table(this, 'SimpleTable', {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
     });
 
