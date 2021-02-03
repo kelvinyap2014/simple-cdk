@@ -3,6 +3,7 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecs_patterns from "@aws-cdk/aws-ecs-patterns";
+import * as dynamodb from '@aws-cdk/aws-dynamodb';
 
 export class SimpleCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -36,7 +37,7 @@ export class SimpleCdkStack extends cdk.Stack {
     });
 
     // Create a load-balanced Node Fargate service and make it public
-    // React app with talk to Node Service over public Internet
+    // React app will talk to this Node Service over public Internet
     new ecs_patterns.ApplicationLoadBalancedFargateService(this, "SimpleNodeFargateService", {
       cluster: cluster, // Required
       cpu: 256, // Default is 256
@@ -46,6 +47,10 @@ export class SimpleCdkStack extends cdk.Stack {
       publicLoadBalancer: true // Default is false
     });
 
+    // Create a DynamoDB table
+    const table = new dynamodb.Table(this, 'SimpleTable', {
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
+    });
 
 
   }
