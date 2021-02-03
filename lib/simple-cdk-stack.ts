@@ -5,10 +5,17 @@ import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecs_patterns from "@aws-cdk/aws-ecs-patterns";
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as sqs from '@aws-cdk/aws-sqs';
+import { DockerImageAsset } from "@aws-cdk/aws-ecr-assets";
+import { join } from "path";
 
 export class SimpleCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // Simple Node JS service
+    const simpleNodeService = new DockerImageAsset(this, "SimpleNodeService", {
+      directory: join(__dirname, "..", "simple-node-service"),
+    });
 
     // Create a S3 Bucket
     new s3.Bucket(this, 'SimpleBucket', {
@@ -43,7 +50,10 @@ export class SimpleCdkStack extends cdk.Stack {
       cluster: cluster, // Required
       cpu: 256, // Default is 256
       desiredCount: 1, // Default is 1
-      taskImageOptions: { image: ecs.ContainerImage.fromRegistry("amazon/amazon-ecs-sample") },
+      taskImageOptions: {
+        image: ecs.ContainerImage.fromDockerImageAsset(simpleNodeService),
+        containerPort: 8080,
+      },
       memoryLimitMiB: 512, // Default is 512
       publicLoadBalancer: true // Default is false
     });
