@@ -26,16 +26,23 @@ The CDK script generates the following components in AWS
 See ./simple-node-service/*, it is a Node JS app deployed as one of the Fargate services.
 
 ### Build commands for Simple Node Service
- * `npm run build`                                      compile typescript to js
- * `npm run watch`                                      watch for changes and compile
- * `docker build --tag simple-node-service .`           build a docker image
- * `docker run -p 8080:8080/tcp simple-node-service`    run a docker image
- * `docker run -it simple-node-service bash`            run into the docker image shell
+ * `npm run build`                                              compile typescript to js
+ * `npm run watch`                                              watch for changes and compile
+ * `docker build --tag local/simple-node-service .`             build a docker image
+ * `docker run -p 8888:8080/tcp local/simple-node-service`      run a docker image
+ * `docker run -it local/simple-node-service bash`              run into the docker image shell
 
 ## Simple Python Service
 See ./simple-python-service/*, it is a Python app deployed as one of the Fargate services.
 
 ### Build commands for Simple Python Service
- * `docker build --tag simple-python-service .` build a docker image
- * `docker run simple-python-service`           run a docker image
- * `docker run -it simple-python-service bash`  run into the docker image shell
+ * `docker build --tag local/simple-python-service .` build a docker image
+ * `docker run local/simple-python-service`           run a docker image
+ * `docker run -it local/simple-python-service bash`  run into the docker image shell
+
+## Local integration testing
+See ./test-integration for a Docker Compose file that bring up Simple Node Service, Simple Python Service and local AWS services (via [localstack](https://github.com/localstack/localstack)) such as S3, SQS, DynamoDB.
+
+### Build commands for Simple Python Service
+ * `docker-compose build` build local services
+ * `docker-compose up`    run all services

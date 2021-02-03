@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack-full
+    network_mode: bridge
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "${PORT_WEB_UI-3333}:${PORT_WEB_UI-3333}"
+    environment:
+      - SERVICES=${SERVICES-s3,sqs,dynamodb}
+      - DEBUG=${DEBUG-1}
+      - DATA_DIR=${DATA_DIR-/tmp/localstack/data}
+      - PORT_WEB_UI=${PORT_WEB_UI-3333}
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOST_TMP_FOLDER=/tmp/localstack
+    volumes:
+      - "/tmp/localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    restart: always
+
+  simple-node-service:
+    image: local/simple-node-service:latest
+    build:
+      context: ./../simple-node-service
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+    ports:
+      - 7777:8080
+    restart: always
+
+  simple-python-service:
+    image: local/simple-python-service:latest
+    build:
+      context: ./../simple-python-service
+      dockerfile: Dockerfile
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+    restart: always
