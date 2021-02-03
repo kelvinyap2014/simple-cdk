@@ -4,6 +4,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as ecs_patterns from "@aws-cdk/aws-ecs-patterns";
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import * as sqs from '@aws-cdk/aws-sqs';
 
 export class SimpleCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -52,6 +53,8 @@ export class SimpleCdkStack extends cdk.Stack {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
     });
 
+    // Create a SQS service
+    new sqs.Queue(this, 'SimpleQueue');
 
   }
 }
