@@ -1,8 +1,16 @@
-# Welcome to your CDK TypeScript project!
+# Welcome to the Simple CDK TypeScript project!
 
-This is a blank project for TypeScript development with CDK.
+This is a Simple project for TypeScript development with CDK.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
+
+The CDK script generates the following components in AWS
+* One ECS cluster
+* One VPC
+* Two Fargate services
+* One S3 bucket
+* One DynamoDB table
+* One SQS service
 
 ## Useful commands
 
