@@ -17,6 +17,11 @@ export class SimpleCdkStack extends cdk.Stack {
       directory: join(__dirname, "..", "simple-node-service"),
     });
 
+    // Simple Python service
+    const simplePythonService = new DockerImageAsset(this, "SimplePythonService", {
+      directory: join(__dirname, "..", "simple-python-service"),
+    });
+
     // Create a S3 Bucket
     new s3.Bucket(this, 'SimpleBucket', {
       versioned: true,
@@ -39,7 +44,9 @@ export class SimpleCdkStack extends cdk.Stack {
       cluster: cluster, // Required
       cpu: 256, // Default is 256
       desiredCount: 1, // Default is 1
-      taskImageOptions: { image: ecs.ContainerImage.fromRegistry("amazon/amazon-ecs-sample") },
+      taskImageOptions: {
+        image: ecs.ContainerImage.fromDockerImageAsset(simplePythonService),
+      },
       memoryLimitMiB: 512, // Default is 512
       publicLoadBalancer: false // Default is false
     });
