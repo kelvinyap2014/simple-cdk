@@ -38,7 +38,7 @@ app.get("/sqs", (req: Request, res: Response) => {
         StringValue: "GitHub"
       }
     },
-    MessageBody: JSON.stringify({"Message": message}),
+    MessageBody: JSON.stringify({"Message": message, "File": now}),
     QueueUrl: queueUrl
   };
  
@@ -48,7 +48,7 @@ app.get("/sqs", (req: Request, res: Response) => {
       res.send(`Error sending this message to SQS - [${message}]`);
     } else {
       console.log("Success", data.MessageId);
-      res.send(`Success sending this message to SQS - [${message}]`);
+      res.send(`Success sending this message to SQS - [${message}]. Browse {s3_host}/${now}`);
     }
   });
 });
