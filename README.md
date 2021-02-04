@@ -43,6 +43,21 @@ See ./simple-python-service/*, it is a Python app deployed as one of the Fargate
 ## Local integration testing
 See ./test-integration for a Docker Compose file that bring up Simple Node Service, Simple Python Service and local AWS services (via [localstack](https://github.com/localstack/localstack)) such as S3, SQS, DynamoDB.
 
-### Build commands for Simple Python Service
- * `docker-compose build` build local services
- * `docker-compose up`    run all services
+### Build Simple Node Service in ./simple-node-service
+ * `npm run build`  compile typescript to js
+
+### Build commands for local integration testing in ./test-integration
+ * `docker-compose build` build all local services
+ * `docker-compose up`    run all local services
+
+### Handle local SQS message queues
+ * Normal queue - `aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name SimpleQueue`
+ * Error queue - `aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name ErrorQueue`
+ * List queues - `aws --endpoint-url=http://localhost:4566 sqs list-queues`
+
+### Browse
+ * `http://localhost:4566/health`   check the health of localstack services
+ * `http://localhost:3333`          web UI for localstack services
+ * `http://localhost:7777`          web UI for Simple Node Service
+ * `http://localhost:7777/sqs`      send a message to SQS queue `SimpleQueue`
+
