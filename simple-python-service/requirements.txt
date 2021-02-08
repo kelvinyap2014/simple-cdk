@@ -1,4 +1,4 @@
 
-sqs_py
-pySqsListener
 boto3
+localstack-client
+python-decouple

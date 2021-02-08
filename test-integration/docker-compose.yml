@@ -59,6 +59,12 @@ services:
         limits:
           cpus: '0.1'
           memory: 50M
+    environment:
+      - PY_HOST=localstack
+      - PY_INTERVAL=5
+      - PY_QUEUE_NAME=SimpleQueue
+      - PY_BUCKET_NAME=simplecdkstack-simplebucket
+      - PY_DEV=true
     depends_on:
       - simple-node-service
       - localstack
