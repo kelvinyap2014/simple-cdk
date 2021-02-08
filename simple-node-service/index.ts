@@ -21,6 +21,7 @@ app.get("/sqs", (req: Request, res: Response) => {
   const file = now.split(":").join("") + ".txt";
   // Create an SQS service object on the elasticmq endpoint
   const config = {
+    // @ts-ignore
     endpoint: new AWS.Endpoint(queueHost),
     accessKeyId: accessKeyId,
     secretAccessKey: secretAccessKey,
@@ -43,6 +44,7 @@ app.get("/sqs", (req: Request, res: Response) => {
     QueueUrl: queueUrl
   };
  
+  // @ts-ignore
   sqs.sendMessage(params, function(err, data) {
     if (err) {
       console.log("Error", err);
