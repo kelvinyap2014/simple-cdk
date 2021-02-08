@@ -12,6 +12,29 @@ export class SimpleCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // Create a S3 Bucket
+    new s3.Bucket(this, 'SimpleBucket', {
+      versioned: true,
+      publicReadAccess: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    });
+
+    // Create a DynamoDB table
+    new dynamodb.Table(this, 'SimpleTable', {
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
+    });
+
+    // Create a SQS service
+    new sqs.Queue(this, 'SimpleQueue');
+
+    // By default, do not provision VPC, ECS Cluster and Fargate Services
+    // That cost $16 for 2 days of testing on AWS Free Tier
+    // this.provisionVPC();
+
+  }
+
+  // Provision VPC, ECS Cluster and Fargate Services
+  provisionVPC() {
     // Simple Node JS service
     const simpleNodeService = new DockerImageAsset(this, "SimpleNodeService", {
       directory: join(__dirname, "..", "simple-node-service"),
@@ -20,13 +43,6 @@ export class SimpleCdkStack extends cdk.Stack {
     // Simple Python service
     const simplePythonService = new DockerImageAsset(this, "SimplePythonService", {
       directory: join(__dirname, "..", "simple-python-service"),
-    });
-
-    // Create a S3 Bucket
-    new s3.Bucket(this, 'SimpleBucket', {
-      versioned: true,
-      publicReadAccess: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     // Create a VPC
@@ -64,14 +80,5 @@ export class SimpleCdkStack extends cdk.Stack {
       memoryLimitMiB: 512, // Default is 512
       publicLoadBalancer: true // Default is false
     });
-
-    // Create a DynamoDB table
-    new dynamodb.Table(this, 'SimpleTable', {
-      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
-    });
-
-    // Create a SQS service
-    new sqs.Queue(this, 'SimpleQueue');
-
   }
 }
