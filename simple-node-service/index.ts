@@ -51,7 +51,7 @@ app.get("/sqs", (req: Request, res: Response) => {
       res.send(`Error sending this message to SQS - [${message}]`);
     } else {
       console.log("Success", data.MessageId);
-      res.send(`Success sending this message to SQS - [${message}]. Browse {s3_host}/${file}`);
+      res.send(`Success sending this message to SQS - [${message}]. Browse s3://simplecdkstack-simplebucket/${file}`);
     }
   });
 });

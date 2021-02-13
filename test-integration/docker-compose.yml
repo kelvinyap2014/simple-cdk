@@ -46,6 +46,7 @@ services:
       - NODE_LOGGER=dev
     depends_on:
       - localstack
+      - simple-python-service
     restart: always
 
   simple-python-service:
@@ -65,7 +66,7 @@ services:
       - PY_QUEUE_NAME=SimpleQueue
       - PY_BUCKET_NAME=simplecdkstack-simplebucket
       - PY_DEV=true
+      - PY_REGION=region
     depends_on:
-      - simple-node-service
       - localstack
     restart: always

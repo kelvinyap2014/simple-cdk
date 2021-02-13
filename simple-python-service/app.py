@@ -21,7 +21,7 @@ def ensure_aws(service):
         session = localstack_client.session.Session(localstack_host=config('PY_HOST'))
         return session.client(service)
     else:
-        return boto3.resource(service)
+        return boto3.client(service)
 
 def ensure_queue(sqs, queueName):
     queue = None
@@ -62,7 +62,9 @@ def ensure_bucket(s3):
     else:
         logging.info('Bucket [' + config('PY_BUCKET_NAME') + '] not exists. Create one.')
         bucket_name = config('PY_BUCKET_NAME')
-        s3.create_bucket(Bucket=bucket_name)
+        s3.create_bucket(
+            Bucket=bucket_name,
+            CreateBucketConfiguration={'LocationConstraint': config('PY_REGION')})
 
     return bucket_name
 
