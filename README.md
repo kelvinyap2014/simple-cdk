@@ -50,7 +50,7 @@ See ./simple-python-service/*, it is a Python app deployed as one of the Fargate
 ## Local integration testing
 See ./test-integration for a Docker Compose file that bring up Simple Node Service, Simple Python Service and local AWS services (via [localstack](https://github.com/localstack/localstack)) such as S3, SQS, DynamoDB.
 
-When `http://localhost:7777/sqs` get browsed, the Simple Node Service will be hit, a timestamped message will be generated and sent to SQS. Then, the Simple Python Service will pick up the message from SQS, generate a file and upload to S3. The `http://localhost:7777/sqs` web response will provide SQS sending status and the file name (if success).
+When `http://localhost:7777/sqs` get browsed, the Simple Node Service will be hit, a timestamped message will be generated and sent to SQS, added to DynamoDB as well. Then, the Simple Python Service will pick up the message from SQS, generate a file and upload to S3. The `http://localhost:7777/sqs` web response will provide SQS sending status and the file name (if success).
 
 ### Current state
 The docker-compose.yml (or local development environment) was tested fine against AWS credentials on actual AWS SQS and S3 environment. It was tested fine against localstack as well.
@@ -72,6 +72,7 @@ The docker-compose.yml (or local development environment) was tested fine agains
  * `http://localhost:3333`          web UI for localstack services
  * `http://localhost:7777`          web UI for Simple Node Service
  * `http://localhost:7777/sqs`      send a message to SQS queue `SimpleQueue`
+ * `http://localhost:7777/dynamodb` list data (as server logs) from DynamoDB `MESSAGE` table
 
 ## Prerequisite for individual component development
  * Docker
