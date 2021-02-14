@@ -68,7 +68,7 @@ const insertMessageTableDynamoDB = (messageId: string, message: string, file: st
   const ddb = new AWS.DynamoDB(config);
 
   const params = {
-    TableName: 'MESSAGE',
+    TableName: 'SIMPLE_MESSAGE',
     Item: {
       'ID' : {S: messageId},
       'CONTENT' : {S: message},
@@ -112,7 +112,7 @@ const createInsertMessageTableDynamoDB = (messageId: string, message: string, fi
       ReadCapacityUnits: 1,
       WriteCapacityUnits: 1
     },
-    TableName: 'MESSAGE',
+    TableName: 'SIMPLE_MESSAGE',
     StreamSpecification: {
       StreamEnabled: false
     }
@@ -134,7 +134,7 @@ const queryMessageTableDynamoDB = (): void => {
   // Create the DynamoDB service object
   const ddb = new AWS.DynamoDB(config);
   const params = {
-    TableName: "MESSAGE",
+    TableName: "SIMPLE_MESSAGE",
     ExclusiveStartKey: undefined
   };
 
