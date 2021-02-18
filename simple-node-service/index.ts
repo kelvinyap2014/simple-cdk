@@ -3,17 +3,42 @@ import logger from "morgan";
 import AWS from "aws-sdk";
 
 const port = process.env.NODE_PORT;
-const queueHost = process.env.NODE_QUEUE_HOST || "";
-const queueUrl = process.env.NODE_QUEUE_URL || "";
+const awsHost = process.env.NODE_AWS_HOST || "";
+const queueName = process.env.NODE_QUEUE_NAME || "";
 const accessKeyId = process.env.NODE_ACCESS_KEY_ID;
 const secretAccessKey = process.env.NODE_SECRET_ACCESS_KEY;
 const region = process.env.NODE_REGION;
 
 const config = {
-  endpoint: new AWS.Endpoint(queueHost),
+  endpoint: new AWS.Endpoint(awsHost),
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey,
   region: region,
+}
+
+let queueUrl: string;
+const loadQueueUrl = () => {
+  const sqs = new AWS.SQS(config);
+  var params = {
+    QueueNamePrefix: queueName
+  };
+  sqs.listQueues(params, (err, data) => {
+    if (err) {
+      console.log("Error SQS listQueues()", err);
+    } else {
+      console.log("Success SQS listQueues()", data);
+      if(data.QueueUrls) {
+        queueUrl = data.QueueUrls[0];
+      }
+    }
+  });
+}
+
+if(process.env.NODE_DEV === "true") {
+  console.log(`Set queueUrl to ${process.env.NODE_QUEUE_URL}`);
+  queueUrl = process.env.NODE_QUEUE_URL || "";
+} else {
+  loadQueueUrl();
 }
 
 const app = express();
@@ -27,7 +52,7 @@ app.get("/dynamodb", (req: Request, res: Response) => {
 });
 
 app.get("/sqs", (req: Request, res: Response) => {
-  console.log(`Sending message to SQS at ${queueHost}`);
+  console.log(`Sending message to SQS at ${awsHost}`);
   const now = new Date().toISOString();
   const message = `Hello SQS at ${now}`;
   const file = now.split(":").join("") + ".txt";

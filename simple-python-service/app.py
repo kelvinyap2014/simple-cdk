@@ -18,21 +18,37 @@ logging.basicConfig(
 
 def ensure_aws(service):
     if 'true' == config('PY_DEV'):
-        session = localstack_client.session.Session(localstack_host=config('PY_HOST'))
+        session = localstack_client.session.Session(localstack_host=config('PY_LOCALSTACK_HOST_NAME'))
         return session.client(service)
     else:
         return boto3.client(service)
 
-def ensure_queue(sqs, queueName):
-    queue = None
+def find_queue_url(sqs, queueName):
+    queue_url = None
     try:
-        queue = sqs.get_queue_url(QueueName=queueName)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == 'AWS.SimpleQueueService.NonExistentQueue':
-            logging.info('Queue [' + queueName + '] not exists. Create one.')
-            sqs.create_queue(QueueName=queueName)
-            queue = sqs.get_queue_url(QueueName=queueName)
-    return queue
+        response = sqs.list_queues(QueueNamePrefix=queueName)
+        logging.info('Success SQS list_queues()')
+        if 'QueueUrls' in response and response['QueueUrls']:
+            queue_url = response['QueueUrls'][0]
+            logging.info(f'Found queue - {queue_url}')
+    except Exception:
+        logging.error('Error SQS list_queues()', exc_info=True)
+
+    return queue_url
+
+def ensure_queue(sqs, queueName):
+    queue_url = find_queue_url(sqs, queueName)
+    if queue_url:
+        return queue_url
+
+    logging.info('Queue [' + queueName + '] not exists. Create one.')
+    sqs.create_queue(QueueName=queueName)
+    time.sleep(5)
+    queue = sqs.get_queue_url(QueueName=queueName)
+    queue_url = queue['QueueUrl']
+    logging.info(f'Created queue - {queue_url}')
+            
+    return queue_url
 
 def process_queue(sqs, queueUrl):
     message = sqs.receive_message(QueueUrl=queueUrl)
@@ -83,9 +99,12 @@ def put_to_s3(message, file_name):
     logging.info(f'Uploaded file to S3 - {file_name}')
 
 
+logging.info('Simple Python Service sleeping...')
+time.sleep(int(config('PY_DELAY')))
+logging.info('Simple Python Service starting...')
 sqs = ensure_aws('sqs')
-queue = ensure_queue(sqs, config('PY_QUEUE_NAME'))
+queue_url = ensure_queue(sqs, config('PY_QUEUE_NAME'))
 logging.info('Simple Python Service listening on AWS SQS')
 while(True):
-	process_queue(sqs, queue['QueueUrl'])
+	process_queue(sqs, queue_url)
 	time.sleep(int(config('PY_INTERVAL')))

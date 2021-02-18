@@ -38,12 +38,14 @@ services:
       - 7777:8080
     environment:
       - NODE_PORT=8080
-      - NODE_QUEUE_HOST=http://localstack:4566
-      - NODE_QUEUE_URL=http://localstack:4566/000000000000/SimpleQueue
+      - NODE_AWS_HOST=http://localstack:4566
+      - NODE_QUEUE_NAME=SimpleCdkStack-SimpleQueue
+      - NODE_QUEUE_URL=http://localstack:4566/000000000000/SimpleCdkStack-SimpleQueue
       - NODE_ACCESS_KEY_ID=na
       - NODE_SECRET_ACCESS_KEY=na
       - NODE_REGION=region
       - NODE_LOGGER=dev
+      - NODE_DEV=true
     depends_on:
       - localstack
       - simple-python-service
@@ -61,9 +63,10 @@ services:
           cpus: '0.1'
           memory: 50M
     environment:
-      - PY_HOST=localstack
+      - PY_LOCALSTACK_HOST_NAME=localstack
       - PY_INTERVAL=5
-      - PY_QUEUE_NAME=SimpleQueue
+      - PY_DELAY=60
+      - PY_QUEUE_NAME=SimpleCdkStack-SimpleQueue
       - PY_BUCKET_NAME=simplecdkstack-simplebucket
       - PY_DEV=true
       - PY_REGION=region

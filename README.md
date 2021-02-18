@@ -64,7 +64,8 @@ The docker-compose.yml (or local development environment) was tested fine agains
 
 ### Build commands for local integration testing in ./test-integration
  * `docker-compose build` build all local services
- * `docker-compose up`    run all local services
+ * `docker-compose pull`  upgrade localstack
+ * `docker-compose up`    run all local services with localstack
 
 ### AWS commands on localstack
  * SQS list queues - `aws --endpoint-url=http://localhost:4566 sqs list-queues`
@@ -75,7 +76,7 @@ The docker-compose.yml (or local development environment) was tested fine agains
  * `http://localhost:4566/health`   check the health of localstack services
  * `http://localhost:3333`          web UI for localstack services
  * `http://localhost:7777`          web UI for Simple Node Service
- * `http://localhost:7777/sqs`      send a message to SQS queue `SimpleQueue`
+ * `http://localhost:7777/sqs`      send a message to SQS queue `SimpleCdkStack-SimpleQueue`
  * `http://localhost:7777/dynamodb` list data (as server logs) from DynamoDB `SIMPLE_MESSAGE` table
 
 ## Prerequisite for individual component development
