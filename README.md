@@ -25,6 +25,9 @@ By default, we do not provision VPC, ECS Cluster and Fargate Services to AWS. Th
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
 
+### Utilities
+ * `npm install -g aws-cdk@latest`  upgrade CDK  
+
 ## Simple Node Service
 See ./simple-node-service/*, it is a Node JS app deployed as one of the Fargate services.
 
