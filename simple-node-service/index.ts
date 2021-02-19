@@ -67,9 +67,7 @@ app.get("/sqs", (req: Request, res: Response) => {
 const insertMessageToSimpleTableDynamoDB = (messageId: string, message: string, file: string): void => {
   console.log(`insertMessageToSimpleTableDynamoDB ${file}`);
 
-  // Create the DynamoDB service object
-  AWS.config.update({region: region});
-  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  const ddb = getDynamoDB();
 
   const params = {
     TableName: tableName,
@@ -103,9 +101,7 @@ const insertMessageToSimpleTableDynamoDB = (messageId: string, message: string, 
 
 const createSimpleTableDynamoDB = (): void => {
   console.log(`createSimpleTableDynamoDB`);
-  // Create the DynamoDB service object
-  AWS.config.update({region: region});
-  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  const ddb = getDynamoDB();
 
   const params = {
     AttributeDefinitions: [
@@ -144,9 +140,7 @@ const createSimpleTableDynamoDB = (): void => {
 
 const querySimpleTableDynamoDB = (): void => {
   console.log(`querySimpleTableDynamoDB`);
-  // Create the DynamoDB service object
-  AWS.config.update({region: region});
-  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  const ddb = getDynamoDB();
 
   const params = {
     TableName: tableName,
@@ -194,8 +188,7 @@ const loadQueueUrl = () => {
 }
 
 const loadTableName = () => {
-  AWS.config.update({region: region});
-  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  const ddb = getDynamoDB();
   const params = {
     ExclusiveStartTableName: process.env.NODE_TABLE_NAME
   };
@@ -210,6 +203,15 @@ const loadTableName = () => {
       }
     }
   });
+}
+
+const getDynamoDB = (): AWS.DynamoDB => {
+  if(isDev) {
+    return new AWS.DynamoDB(config);
+  } else {
+    AWS.config.update({region: region});
+    return new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  }
 }
 
 if(isDev) {
