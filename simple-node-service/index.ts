@@ -199,6 +199,9 @@ const loadTableName = () => {
       console.log("Success DynamoDB listTables()", data);
       if(data.TableNames) {
         tableName = data.TableNames[0];
+        if(!tableName) {
+          tableName = process.env.NODE_TABLE_NAME || "";
+        }
         console.log(`Set tableName to ${tableName}`);
       }
     }
