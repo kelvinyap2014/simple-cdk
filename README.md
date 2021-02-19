@@ -6,14 +6,14 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 The CDK script generates the following components in AWS
 
- * One ECS cluster
- * One VPC
- * Two Fargate services
  * One S3 bucket
+ * One SQS queue
  * One DynamoDB table
- * One SQS service
+ * One VPC
+ * One ECS cluster
+ * Two Fargate services
 
-By default, we do not provision VPC, ECS Cluster and Fargate Services to AWS. That costs $16 for 2 days of testing on AWS Free Tier. To enable these provisions, un-comment `this.provisionVPC()` in `simple-cdk-stack.ts`. A cost effective approach for learning on AWS Free Tier could be just to enable some core services like SQS, S3 and DynamoDB. Then, make use of the `Docker Compose` environment described in the `Local integration testing` section with AWS configurations.
+By default, we do not provision VPC, ECS Cluster and Fargate Services to AWS. That costs $16 for 2 days of testing on AWS Free Tier. To enable these provisions, un-comment `this.provisionVPC()` in `simple-cdk-stack.ts`. A cost effective approach for learning on AWS Free Tier could be just to enable some core services like SQS, S3 and DynamoDB. Then, test locally with AWS configurations.
 
 ## Useful commands for Simple CDK
 

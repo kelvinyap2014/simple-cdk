@@ -24,7 +24,7 @@ export class SimpleCdkStack extends cdk.Stack {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
     });
 
-    // Create a SQS service
+    // Create a SQS queue
     new sqs.Queue(this, 'SimpleQueue');
 
     // By default, do not provision VPC, ECS Cluster and Fargate Services

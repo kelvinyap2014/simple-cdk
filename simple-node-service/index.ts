@@ -53,7 +53,7 @@ app.get("/dynamodb", (req: Request, res: Response) => {
     querySimpleTableDynamoDB();
     res.send("DynamoDB query completed, please check server logs for details");
   } else {
-    res.send("DynamoDB not supported");
+    res.send("DynamoDB not supported from local talking to AWS");
   }
 });
 
