@@ -5,9 +5,11 @@ import AWS from "aws-sdk";
 const port = process.env.NODE_PORT;
 const awsHost = process.env.NODE_AWS_HOST || "";
 const queueName = process.env.NODE_QUEUE_NAME || "";
+const tableName = process.env.NODE_TABLE_NAME || "";
 const accessKeyId = process.env.NODE_ACCESS_KEY_ID;
 const secretAccessKey = process.env.NODE_SECRET_ACCESS_KEY;
 const region = process.env.NODE_REGION;
+const isDev = process.env.NODE_DEV === "true";
 
 const config = {
   endpoint: new AWS.Endpoint(awsHost),
@@ -34,7 +36,7 @@ const loadQueueUrl = () => {
   });
 }
 
-if(process.env.NODE_DEV === "true") {
+if(isDev) {
   console.log(`Set queueUrl to ${process.env.NODE_QUEUE_URL}`);
   queueUrl = process.env.NODE_QUEUE_URL || "";
 } else {
@@ -47,8 +49,12 @@ app.use(logger(process.env.NODE_LOGGER || "dev"));
 app.get("/", (req: Request, res: Response) => res.send("Simple Node Service"));
 
 app.get("/dynamodb", (req: Request, res: Response) => {
-  queryMessageTableDynamoDB();
-  res.send("DynamoDB query success");
+  if(isDev) {
+    querySimpleTableDynamoDB();
+    res.send("DynamoDB query completed, please check server logs for details");
+  } else {
+    res.send("DynamoDB not supported");
+  }
 });
 
 app.get("/sqs", (req: Request, res: Response) => {
@@ -80,20 +86,20 @@ app.get("/sqs", (req: Request, res: Response) => {
       res.send(`Error sending this message to SQS - [${message}]`);
     } else {
       console.log("Success SQS sendMessage()", data.MessageId);
-      insertMessageTableDynamoDB(data.MessageId || "", message, file);
+      if(isDev) insertMessageToSimpleTableDynamoDB(data.MessageId || "", message, file);
       res.send(`Success sending this message to SQS - [${message}]. Browse s3://simplecdkstack-simplebucket/${file}`);
     }
   });
 });
 
-const insertMessageTableDynamoDB = (messageId: string, message: string, file: string): void => {
-  console.log(`insertMessageTableDynamoDB ${file}`);
+const insertMessageToSimpleTableDynamoDB = (messageId: string, message: string, file: string): void => {
+  console.log(`insertMessageToSimpleTableDynamoDB ${file}`);
 
   // Create the DynamoDB service object
   const ddb = new AWS.DynamoDB(config);
 
   const params = {
-    TableName: 'SIMPLE_MESSAGE',
+    TableName: tableName,
     Item: {
       'ID' : {S: messageId},
       'CONTENT' : {S: message},
@@ -105,7 +111,14 @@ const insertMessageTableDynamoDB = (messageId: string, message: string, file: st
   ddb.putItem(params, function(err, data) {
     if (err) {
       if (err.code === "ResourceNotFoundException") {
-        createInsertMessageTableDynamoDB(messageId, message, file);
+        createSimpleTableDynamoDB();
+        const simpleTablePromise = new Promise((resolve, reject) => {
+          setTimeout(() => resolve("Waited 5 seconds"), 5000);
+        });
+        simpleTablePromise.then((successMessage) => {
+          console.log(`${successMessage} for DynamoDB Table being created - ${tableName}`)
+          insertMessageToSimpleTableDynamoDB(messageId, message, file);
+        });
       } else {
         console.log("Error DynamoDB putItem()", err);
       }
@@ -115,8 +128,8 @@ const insertMessageTableDynamoDB = (messageId: string, message: string, file: st
   });
 }
 
-const createInsertMessageTableDynamoDB = (messageId: string, message: string, file: string): void => {
-  console.log(`createInsertMessageTableDynamoDB`);
+const createSimpleTableDynamoDB = (): void => {
+  console.log(`createSimpleTableDynamoDB`);
   // Create the DynamoDB service object
   const ddb = new AWS.DynamoDB(config);
 
@@ -137,7 +150,7 @@ const createInsertMessageTableDynamoDB = (messageId: string, message: string, fi
       ReadCapacityUnits: 1,
       WriteCapacityUnits: 1
     },
-    TableName: 'SIMPLE_MESSAGE',
+    TableName: tableName,
     StreamSpecification: {
       StreamEnabled: false
     }
@@ -149,17 +162,18 @@ const createInsertMessageTableDynamoDB = (messageId: string, message: string, fi
       console.log("Error DynamoDB createTable()", err);
     } else {
       console.log("Table Created DynamoDB createTable()", data);
-      insertMessageTableDynamoDB(messageId, message, file);
     }
   });
+
+  console.log(`Waiting DynamoDB Table being created - ${tableName}`);
 }
 
-const queryMessageTableDynamoDB = (): void => {
-  console.log(`queryMessageTableDynamoDB`);
+const querySimpleTableDynamoDB = (): void => {
+  console.log(`querySimpleTableDynamoDB`);
   // Create the DynamoDB service object
   const ddb = new AWS.DynamoDB(config);
   const params = {
-    TableName: "SIMPLE_MESSAGE",
+    TableName: tableName,
     ExclusiveStartKey: undefined
   };
 

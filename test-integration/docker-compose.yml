@@ -41,6 +41,7 @@ services:
       - NODE_AWS_HOST=http://localstack:4566
       - NODE_QUEUE_NAME=SimpleCdkStack-SimpleQueue
       - NODE_QUEUE_URL=http://localstack:4566/000000000000/SimpleCdkStack-SimpleQueue
+      - NODE_TABLE_NAME=SimpleCdkStack-SimpleTable
       - NODE_ACCESS_KEY_ID=na
       - NODE_SECRET_ACCESS_KEY=na
       - NODE_REGION=region

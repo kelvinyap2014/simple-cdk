@@ -70,14 +70,14 @@ The docker-compose.yml (or local development environment) was tested fine agains
 ### AWS commands on localstack
  * SQS list queues - `aws --endpoint-url=http://localhost:4566 sqs list-queues`
  * S3 list content - `aws --endpoint-url=http://localhost:4566 s3 ls s3://simplecdkstack-simplebucket` 
- * DynamoDB scan content - `aws --endpoint-url=http://localhost:4566 dynamodb scan --table-name SIMPLE_MESSAGE`
+ * DynamoDB scan content - `aws --endpoint-url=http://localhost:4566 dynamodb scan --table-name SimpleCdkStack-SimpleTable`
 
 ### Browse
  * `http://localhost:4566/health`   check the health of localstack services
  * `http://localhost:3333`          web UI for localstack services
  * `http://localhost:7777`          web UI for Simple Node Service
  * `http://localhost:7777/sqs`      send a message to SQS queue `SimpleCdkStack-SimpleQueue`
- * `http://localhost:7777/dynamodb` list data (as server logs) from DynamoDB `SIMPLE_MESSAGE` table
+ * `http://localhost:7777/dynamodb` list data (as server logs) from DynamoDB `SimpleCdkStack-SimpleTable` table
 
 ## Prerequisite for individual component development
  * Docker
