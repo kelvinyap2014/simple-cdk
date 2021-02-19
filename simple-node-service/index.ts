@@ -5,11 +5,12 @@ import AWS from "aws-sdk";
 const port = process.env.NODE_PORT;
 const awsHost = process.env.NODE_AWS_HOST || "";
 const queueName = process.env.NODE_QUEUE_NAME || "";
-const tableName = process.env.NODE_TABLE_NAME || "";
 const accessKeyId = process.env.NODE_ACCESS_KEY_ID;
 const secretAccessKey = process.env.NODE_SECRET_ACCESS_KEY;
 const region = process.env.NODE_REGION;
 const isDev = process.env.NODE_DEV === "true";
+let tableName: string;
+let queueUrl: string;
 
 const config = {
   endpoint: new AWS.Endpoint(awsHost),
@@ -18,43 +19,14 @@ const config = {
   region: region,
 }
 
-let queueUrl: string;
-const loadQueueUrl = () => {
-  const sqs = new AWS.SQS(config);
-  var params = {
-    QueueNamePrefix: queueName
-  };
-  sqs.listQueues(params, (err, data) => {
-    if (err) {
-      console.log("Error SQS listQueues()", err);
-    } else {
-      console.log("Success SQS listQueues()", data);
-      if(data.QueueUrls) {
-        queueUrl = data.QueueUrls[0];
-      }
-    }
-  });
-}
-
-if(isDev) {
-  console.log(`Set queueUrl to ${process.env.NODE_QUEUE_URL}`);
-  queueUrl = process.env.NODE_QUEUE_URL || "";
-} else {
-  loadQueueUrl();
-}
-
 const app = express();
 app.use(logger(process.env.NODE_LOGGER || "dev"));
 
 app.get("/", (req: Request, res: Response) => res.send("Simple Node Service"));
 
 app.get("/dynamodb", (req: Request, res: Response) => {
-  if(isDev) {
-    querySimpleTableDynamoDB();
-    res.send("DynamoDB query completed, please check server logs for details");
-  } else {
-    res.send("DynamoDB not supported from local talking to AWS");
-  }
+  querySimpleTableDynamoDB();
+  res.send("DynamoDB query completed, please check server logs for details");
 });
 
 app.get("/sqs", (req: Request, res: Response) => {
@@ -86,7 +58,7 @@ app.get("/sqs", (req: Request, res: Response) => {
       res.send(`Error sending this message to SQS - [${message}]`);
     } else {
       console.log("Success SQS sendMessage()", data.MessageId);
-      if(isDev) insertMessageToSimpleTableDynamoDB(data.MessageId || "", message, file);
+      insertMessageToSimpleTableDynamoDB(data.MessageId || "", message, file);
       res.send(`Success sending this message to SQS - [${message}]. Browse s3://simplecdkstack-simplebucket/${file}`);
     }
   });
@@ -96,14 +68,15 @@ const insertMessageToSimpleTableDynamoDB = (messageId: string, message: string, 
   console.log(`insertMessageToSimpleTableDynamoDB ${file}`);
 
   // Create the DynamoDB service object
-  const ddb = new AWS.DynamoDB(config);
+  AWS.config.update({region: region});
+  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
   const params = {
     TableName: tableName,
     Item: {
-      'ID' : {S: messageId},
-      'CONTENT' : {S: message},
-      'FILE' : {S: file}
+      'id' : {S: messageId},
+      'content' : {S: message},
+      'file' : {S: file}
     }
   };
 
@@ -131,18 +104,19 @@ const insertMessageToSimpleTableDynamoDB = (messageId: string, message: string, 
 const createSimpleTableDynamoDB = (): void => {
   console.log(`createSimpleTableDynamoDB`);
   // Create the DynamoDB service object
-  const ddb = new AWS.DynamoDB(config);
+  AWS.config.update({region: region});
+  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
   const params = {
     AttributeDefinitions: [
       {
-        AttributeName: 'ID',
+        AttributeName: 'id',
         AttributeType: 'S'
       }
     ],
     KeySchema: [
       {
-        AttributeName: 'ID',
+        AttributeName: 'id',
         KeyType: 'HASH'
       }
     ],
@@ -171,7 +145,9 @@ const createSimpleTableDynamoDB = (): void => {
 const querySimpleTableDynamoDB = (): void => {
   console.log(`querySimpleTableDynamoDB`);
   // Create the DynamoDB service object
-  const ddb = new AWS.DynamoDB(config);
+  AWS.config.update({region: region});
+  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+
   const params = {
     TableName: tableName,
     ExclusiveStartKey: undefined
@@ -197,6 +173,53 @@ const querySimpleTableDynamoDB = (): void => {
   }
 
   ddb.scan(params, onScan);
+}
+
+const loadQueueUrl = () => {
+  const sqs = new AWS.SQS(config);
+  const params = {
+    QueueNamePrefix: queueName
+  };
+  sqs.listQueues(params, (err, data) => {
+    if (err) {
+      console.log("Error SQS listQueues()", err);
+    } else {
+      console.log("Success SQS listQueues()", data);
+      if(data.QueueUrls) {
+        queueUrl = data.QueueUrls[0];
+        console.log(`Set queueUrl to ${queueUrl}`);
+      }
+    }
+  });
+}
+
+const loadTableName = () => {
+  AWS.config.update({region: region});
+  const ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  const params = {
+    ExclusiveStartTableName: process.env.NODE_TABLE_NAME
+  };
+  ddb.listTables(params, (err, data) => {
+    if (err) {
+      console.log("Error DynamoDB listTables()", err);
+    } else {
+      console.log("Success DynamoDB listTables()", data);
+      if(data.TableNames) {
+        tableName = data.TableNames[0];
+        console.log(`Set tableName to ${tableName}`);
+      }
+    }
+  });
+}
+
+if(isDev) {
+  queueUrl = process.env.NODE_QUEUE_URL || "";
+  tableName = process.env.NODE_TABLE_NAME || "";
+  console.log(`Set queueUrl to ${queueUrl}`);
+  console.log(`Set tableName to ${tableName}`);
+} else {
+  loadQueueUrl();
+  loadTableName();
 }
 
 app.listen(port, () =>

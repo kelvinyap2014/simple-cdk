@@ -21,7 +21,8 @@ export class SimpleCdkStack extends cdk.Stack {
 
     // Create a DynamoDB table
     new dynamodb.Table(this, 'SimpleTable', {
-      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING }
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     // Create a SQS queue
