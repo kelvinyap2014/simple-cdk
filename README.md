@@ -1,6 +1,7 @@
 # Welcome to the Simple AWS CDK TypeScript project!
 
 This is a Simple project for TypeScript development with AWS CDK for learning purposes.
+It was started with [AWS CDK tutorial](https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html)
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
